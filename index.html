@@ -1,64 +1,169 @@
 <!doctype html>
 <html lang="it">
+
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Beauty Invaders — spara ai trucchi!</title>
-<style>
-  :root{
-    --bg:#0f1724;
-    --panel:#0b1220aa;
-    --accent:#ff7aa2;
-    --text:#f8fafc;
-  }
-  html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-  body{
-    background: radial-gradient(closest-side,#071028 0%, var(--bg) 60%);
-    color:var(--text);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
-  }
-  .wrap{
-    width:100%;
-    max-width:900px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.15));
-    border-radius:12px;
-    box-shadow: 0 10px 30px rgba(2,6,23,0.6);
-    padding:12px;
-    display:grid;
-    grid-template-columns:1fr 260px;
-    gap:12px;
-  }
-  canvas{background:transparent; width:100%; height:600px; display:block; border-radius:8px; }
-  .panel{
-    padding:12px;
-    background:var(--panel);
-    border-radius:8px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    align-items:stretch;
-  }
-  .panel h2{margin:0;font-size:18px;color:var(--accent)}
-  .stats{display:flex;gap:8px;flex-wrap:wrap}
-  .stat{background:rgba(255,255,255,0.03);padding:8px;border-radius:8px;font-size:14px}
-  .controls{display:flex;gap:8px;flex-wrap:wrap}
-  button{background:linear-gradient(180deg,var(--accent),#ff5f8e);border:none;color:white;padding:8px 10px;border-radius:8px;cursor:pointer}
-  button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);}
-  .hint{font-size:13px;color:#cbd5e1}
-  .touch-controls{display:flex;gap:8px;justify-content:center;margin-top:6px}
-  .touch-controls button{flex:1}
-  @media(max-width:880px){
-    .wrap{grid-template-columns:1fr; max-width:640px}
-    canvas{height:520px}
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Beauty Invaders — spara ai trucchi!</title>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --panel: #0b1220aa;
+      --accent: #ff7aa2;
+      --text: #f8fafc;
+    }
+
+    html,
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background: radial-gradient(closest-side, #071028 0%, var(--bg) 60%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    @media(max-width:880px) {
+      body {
+        padding: 0;
+      }
+    }
+
+    .wrap {
+      width: 100%;
+      height: 100%;
+      max-width: 900px;
+      max-height: 900px;
+      /* Limit height on large screens */
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.15));
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+      padding: 12px;
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      box-sizing: border-box;
+    }
+
+    @media(max-width:880px) {
+      .wrap {
+        flex-direction: column;
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 0;
+      }
+    }
+
+    .game-area {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    canvas {
+      background: transparent;
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .panel {
+      width: 260px;
+      flex-shrink: 0;
+      padding: 12px;
+      background: var(--panel);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+      overflow-y: auto;
+      /* Allow panel scroll if really needed */
+    }
+
+    @media(max-width:880px) {
+      .panel {
+        width: auto;
+        max-height: 40%;
+        /* Limit panel height on mobile */
+      }
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--accent)
+    }
+
+    .stats {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .stat {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 14px
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    button {
+      background: linear-gradient(180deg, var(--accent), #ff5f8e);
+      border: none;
+      color: white;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer
+    }
+
+    button.secondary {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #cbd5e1
+    }
+
+    .touch-controls {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 6px
+    }
+
+    .touch-controls button {
+      flex: 1;
+      padding: 12px;
+    }
+
+    /* Larger touch targets */
+  </style>
 </head>
+
 <body>
   <div class="wrap">
-    <div>
+    <div class="game-area">
       <canvas id="game"></canvas>
     </div>
     <aside class="panel">
@@ -92,328 +197,329 @@
     </aside>
   </div>
 
-<script>
-/* -----------------------
-   Beauty Invaders (single file)
-   - Canvas game with falling "trucchi" (emoji)
-   - Move left/right, shoot with space
-   - Touch support for mobile
-   ----------------------- */
+  <script>
+    /* -----------------------
+       Beauty Invaders (single file)
+       - Canvas game with falling "trucchi" (emoji)
+       - Move left/right, shoot with space
+       - Touch support for mobile
+       ----------------------- */
 
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d', { alpha: true });
-let W, H, scale;
-function resize(){
-  // handle HiDPI
-  const rect = canvas.getBoundingClientRect();
-  W = Math.max(320, rect.width);
-  H = Math.max(420, rect.height);
-  scale = window.devicePixelRatio || 1;
-  canvas.width = Math.floor(W * scale);
-  canvas.height = Math.floor(H * scale);
-  canvas.style.width = rect.width + 'px';
-  canvas.style.height = rect.height + 'px';
-  ctx.setTransform(scale,0,0,scale,0,0);
-}
-window.addEventListener('resize', resize);
-resize();
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d', { alpha: true });
+    let W, H, scale;
+    function resize() {
+      // handle HiDPI
+      const rect = canvas.getBoundingClientRect();
+      W = Math.max(320, rect.width);
+      H = Math.max(300, rect.height);
+      scale = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(W * scale);
+      canvas.height = Math.floor(H * scale);
+      // canvas.style.width/height are handled by CSS now
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
-/* Game state */
-let runLoop = null;
-let lastTime = 0;
-let game = {
-  score:0,
-  lives:3,
-  level:1,
-  running:false,
-  paused:false,
-  spawnTimer:0,
-  spawnInterval:1200, // ms
-  difficultyTimer:0
-};
+    /* Game state */
+    let runLoop = null;
+    let lastTime = 0;
+    let game = {
+      score: 0,
+      lives: 3,
+      level: 1,
+      running: false,
+      paused: false,
+      spawnTimer: 0,
+      spawnInterval: 1200, // ms
+      difficultyTimer: 0
+    };
 
-/* Player */
-const player = {
-  w:64,
-  h:24,
-  x:0,
-  y:0,
-  speed:420, // px/s
-  color:'#ffdbe6',
-  bullets:[],
-  shootCooldown:0,
-  shootDelay:300
-};
+    /* Player */
+    const player = {
+      w: 64,
+      h: 24,
+      x: 0,
+      y: 0,
+      speed: 420, // px/s
+      color: '#ffdbe6',
+      bullets: [],
+      shootCooldown: 0,
+      shootDelay: 300
+    };
 
-/* Falling items (trucchi) */
-const items = [];
-const emojis = [
-  {e:'💄',score:40},
-  {e:'💋',score:30},
-  {e:'🧴',score:20},
-  {e:'🫧',score:50} // special
-];
+    /* Falling items (trucchi) */
+    const items = [];
+    const emojis = [
+      { e: '💄', score: 40 },
+      { e: '💋', score: 30 },
+      { e: '🧴', score: 20 },
+      { e: '🫧', score: 50 },
+      { e: '💣', score: -15 }
+    ];
 
-/* Helpers */
-function rand(min,max){ return Math.random()*(max-min)+min; }
-function spawnItem(){
-  const pick = emojis[Math.floor(Math.random()*emojis.length)];
-  const size = rand(28,44);
-  const item = {
-    x: rand(20, W - 60),
-    y: -50,
-    size: size,
-    emoji: pick.e,
-    score: pick.score,
-    vy: rand(70, 150) + (game.level-1)*15,
-    vx: rand(-20,20)
-  };
-  items.push(item);
-}
+    /* Helpers */
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+    function spawnItem() {
+      const pick = emojis[Math.floor(Math.random() * emojis.length)];
+      const size = rand(28, 44);
+      const item = {
+        x: rand(20, W - 60),
+        y: -50,
+        size: size,
+        emoji: pick.e,
+        score: pick.score,
+        vy: rand(70, 150) + (game.level - 1) * 15,
+        vx: rand(-20, 20)
+      };
+      items.push(item);
+    }
 
-/* Input */
-const keys = {};
-window.addEventListener('keydown', e=>{
-  keys[e.key] = true;
-  if (e.key === ' '){ e.preventDefault(); }
-});
-window.addEventListener('keyup', e=>{
-  keys[e.key] = false;
-});
-/* Touch controls */
-document.getElementById('leftTouch').addEventListener('touchstart', e=>{ e.preventDefault(); keys['ArrowLeft']=true; });
-document.getElementById('leftTouch').addEventListener('touchend', e=>{ e.preventDefault(); keys['ArrowLeft']=false; });
-document.getElementById('rightTouch').addEventListener('touchstart', e=>{ e.preventDefault(); keys['ArrowRight']=true; });
-document.getElementById('rightTouch').addEventListener('touchend', e=>{ e.preventDefault(); keys['ArrowRight']=false; });
-document.getElementById('shootTouch').addEventListener('click', e=>{ keys[' ']=true; setTimeout(()=>keys[' ']=false, 80); });
+    /* Input */
+    const keys = {};
+    window.addEventListener('keydown', e => {
+      keys[e.key] = true;
+      if (e.key === ' ') { e.preventDefault(); }
+    });
+    window.addEventListener('keyup', e => {
+      keys[e.key] = false;
+    });
+    /* Touch controls */
+    document.getElementById('leftTouch').addEventListener('touchstart', e => { e.preventDefault(); keys['ArrowLeft'] = true; });
+    document.getElementById('leftTouch').addEventListener('touchend', e => { e.preventDefault(); keys['ArrowLeft'] = false; });
+    document.getElementById('rightTouch').addEventListener('touchstart', e => { e.preventDefault(); keys['ArrowRight'] = true; });
+    document.getElementById('rightTouch').addEventListener('touchend', e => { e.preventDefault(); keys['ArrowRight'] = false; });
+    document.getElementById('shootTouch').addEventListener('click', e => { keys[' '] = true; setTimeout(() => keys[' '] = false, 80); });
 
-/* UI */
-const scoreEl = document.getElementById('score');
-const livesEl = document.getElementById('lives');
-const levelEl = document.getElementById('level');
-document.getElementById('startBtn').addEventListener('click', startGame);
-document.getElementById('pauseBtn').addEventListener('click', togglePause);
+    /* UI */
+    const scoreEl = document.getElementById('score');
+    const livesEl = document.getElementById('lives');
+    const levelEl = document.getElementById('level');
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('pauseBtn').addEventListener('click', togglePause);
 
-function startGame(){
-  // reset
-  game.score = 0; game.lives = 3; game.level = 1;
-  game.spawnInterval = 1200; game.spawnTimer=0; game.difficultyTimer=0;
-  items.length = 0; player.bullets.length = 0;
-  player.shootCooldown = 0;
-  game.running = true; game.paused = false;
-  lastTime = performance.now();
-  positionPlayer();
-  loop(lastTime);
-}
-function togglePause(){
-  if(!game.running) return;
-  game.paused = !game.paused;
-  if(!game.paused){ lastTime = performance.now(); loop(lastTime); }
-}
+    function startGame() {
+      // reset
+      game.score = 0; game.lives = 3; game.level = 1;
+      game.spawnInterval = 1200; game.spawnTimer = 0; game.difficultyTimer = 0;
+      items.length = 0; player.bullets.length = 0;
+      player.shootCooldown = 0;
+      game.running = true; game.paused = false;
+      lastTime = performance.now();
+      positionPlayer();
+      loop(lastTime);
+    }
+    function togglePause() {
+      if (!game.running) return;
+      game.paused = !game.paused;
+      if (!game.paused) { lastTime = performance.now(); loop(lastTime); }
+    }
 
-/* Place player */
-function positionPlayer(){
-  player.x = (W - player.w)/2;
-  player.y = H - player.h - 18;
-}
+    /* Place player */
+    function positionPlayer() {
+      player.x = (W - player.w) / 2;
+      player.y = H - player.h - 18;
+    }
 
-/* Shooting */
-function shoot(){
-  const now = performance.now();
-  if (player.shootCooldown > now) return;
-  player.shootCooldown = now + player.shootDelay;
-  const b = {
-    x: player.x + player.w/2 - 4,
-    y: player.y - 10,
-    w:6, h:12, vy:-560
-  };
-  player.bullets.push(b);
-}
+    /* Shooting */
+    function shoot() {
+      const now = performance.now();
+      if (player.shootCooldown > now) return;
+      player.shootCooldown = now + player.shootDelay;
+      const b = {
+        x: player.x + player.w / 2 - 4,
+        y: player.y - 10,
+        w: 6, h: 12, vy: -560
+      };
+      player.bullets.push(b);
+    }
 
-/* Collisions (AABB) */
-function hit(a,b){
-  return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h);
-}
+    /* Collisions (AABB) */
+    function hit(a, b) {
+      return !(a.x + a.w < b.x || a.x > b.x + b.w || a.y + a.h < b.y || a.y > b.y + b.h);
+    }
 
-/* Main loop */
-function loop(t){
-  if (!game.running || game.paused) return;
-  const dt = Math.min(40, t - lastTime); // ms
-  const s = dt / 1000;
-  lastTime = t;
+    /* Main loop */
+    function loop(t) {
+      if (!game.running || game.paused) return;
+      const dt = Math.min(40, t - lastTime); // ms
+      const s = dt / 1000;
+      lastTime = t;
 
-  // update difficulty
-  game.difficultyTimer += dt;
-  if(game.difficultyTimer > 8000){
-    game.difficultyTimer = 0;
-    game.level++;
-    game.spawnInterval = Math.max(420, game.spawnInterval - 100);
-  }
+      // update difficulty
+      game.difficultyTimer += dt;
+      if (game.difficultyTimer > 8000) {
+        game.difficultyTimer = 0;
+        game.level++;
+        game.spawnInterval = Math.max(420, game.spawnInterval - 100);
+      }
 
-  // spawn items
-  game.spawnTimer += dt;
-  if(game.spawnTimer >= game.spawnInterval){
-    game.spawnTimer = 0;
-    // spawn 1 or sometimes 2
-    spawnItem();
-    if(Math.random() < Math.min(0.25, game.level*0.03)) spawnItem();
-  }
+      // spawn items
+      game.spawnTimer += dt;
+      if (game.spawnTimer >= game.spawnInterval) {
+        game.spawnTimer = 0;
+        // spawn 1 or sometimes 2
+        spawnItem();
+        if (Math.random() < Math.min(0.25, game.level * 0.03)) spawnItem();
+      }
 
-  // player movement
-  if(keys['ArrowLeft'] || keys['a']) player.x -= player.speed * s;
-  if(keys['ArrowRight'] || keys['d']) player.x += player.speed * s;
-  // bounds
-  if(player.x < 6) player.x = 6;
-  if(player.x + player.w > W - 6) player.x = W - 6 - player.w;
+      // player movement
+      if (keys['ArrowLeft'] || keys['a']) player.x -= player.speed * s;
+      if (keys['ArrowRight'] || keys['d']) player.x += player.speed * s;
+      // bounds
+      if (player.x < 6) player.x = 6;
+      if (player.x + player.w > W - 6) player.x = W - 6 - player.w;
 
-  // shooting
-  if((keys[' '] || keys['Spacebar']) ) shoot();
+      // shooting
+      if ((keys[' '] || keys['Spacebar'])) shoot();
 
-  // update bullets
-  for(let i = player.bullets.length-1;i>=0;i--){
-    const b = player.bullets[i];
-    b.y += b.vy * s;
-    if(b.y + b.h < -10) player.bullets.splice(i,1);
-  }
+      // update bullets
+      for (let i = player.bullets.length - 1; i >= 0; i--) {
+        const b = player.bullets[i];
+        b.y += b.vy * s;
+        if (b.y + b.h < -10) player.bullets.splice(i, 1);
+      }
 
-  // update items
-  for(let i = items.length-1;i>=0;i--){
-    const it = items[i];
-    it.x += it.vx * s;
-    it.y += it.vy * s;
-    // bounce a bit horizontally
-    if(it.x < 6 || it.x + it.size > W-6) it.vx *= -1;
+      // update items
+      for (let i = items.length - 1; i >= 0; i--) {
+        const it = items[i];
+        it.x += it.vx * s;
+        it.y += it.vy * s;
+        // bounce a bit horizontally
+        if (it.x < 6 || it.x + it.size > W - 6) it.vx *= -1;
 
-    // check if reached bottom -> lose life
-    if(it.y > H - 20){
-      items.splice(i,1);
-      game.lives -= 1;
-      if(game.lives <= 0){ gameOver(); return; }
-    } else {
-      // check collision with bullets
-      for(let j = player.bullets.length-1;j>=0;j--){
-        const b = player.bullets[j];
-        const bb = {x:b.x, y:b.y, w:b.w, h:b.h};
-        const ib = {x:it.x, y:it.y, w:it.size, h:it.size};
-        if(hit(bb, ib)){
-          // hit!
-          player.bullets.splice(j,1);
-          // reward
-          game.score += it.score;
-          // small chance to add extra life for high score hits
-          if(Math.random() < 0.03) game.lives = Math.min(5, game.lives + 1);
-          items.splice(i,1);
-          break;
+        // check if reached bottom -> lose life
+        if (it.y > H - 20 && it.score > 0) {
+          items.splice(i, 1);
+          game.lives -= 1;
+          if (game.lives <= 0) { gameOver(); return; }
+        } else {
+          // check collision with bullets
+          for (let j = player.bullets.length - 1; j >= 0; j--) {
+            const b = player.bullets[j];
+            const bb = { x: b.x, y: b.y, w: b.w, h: b.h };
+            const ib = { x: it.x, y: it.y, w: it.size, h: it.size };
+            if (hit(bb, ib)) {
+              // hit!
+              player.bullets.splice(j, 1);
+              // reward
+              game.score += it.score;
+              // small chance to add extra life for high score hits
+              if (Math.random() < 0.03) game.lives = Math.min(5, game.lives + 1);
+              items.splice(i, 1);
+              break;
+            }
+          }
         }
       }
+
+      // UI update
+      scoreEl.textContent = game.score;
+      livesEl.textContent = game.lives;
+      levelEl.textContent = game.level;
+
+      // render
+      draw();
+
+      runLoop = requestAnimationFrame(loop);
     }
-  }
 
-  // UI update
-  scoreEl.textContent = game.score;
-  livesEl.textContent = game.lives;
-  levelEl.textContent = game.level;
+    /* Draw frame */
+    function draw() {
+      // clear
+      ctx.clearRect(0, 0, W, H);
+      // background vignette
+      const g = ctx.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, 'rgba(255,255,255,0.02)');
+      g.addColorStop(1, 'rgba(0,0,0,0.06)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
 
-  // render
-  draw();
+      // draw items
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (const it of items) {
+        ctx.font = `${Math.floor(it.size)}px serif`;
+        // shadow
+        ctx.shadowColor = 'rgba(0,0,0,0.45)';
+        ctx.shadowBlur = 6;
+        ctx.fillText(it.emoji, it.x + it.size / 2, it.y + it.size / 2);
+        ctx.shadowBlur = 0;
+      }
 
-  runLoop = requestAnimationFrame(loop);
-}
+      // draw player (a stylized tray)
+      // body
+      ctx.fillStyle = '#ffffff11';
+      roundRect(ctx, player.x - 6, player.y - 6, player.w + 12, player.h + 12, 10, true, false);
+      // player "bar"
+      ctx.fillStyle = '#ffe6f1';
+      roundRect(ctx, player.x, player.y, player.w, player.h, 6, true, false);
+      // little "brush" icon as triangular turret
+      ctx.fillStyle = '#ff5f8e';
+      ctx.beginPath();
+      ctx.moveTo(player.x + player.w / 2 - 8, player.y - 4);
+      ctx.lineTo(player.x + player.w / 2 + 8, player.y - 4);
+      ctx.lineTo(player.x + player.w / 2, player.y - 18);
+      ctx.closePath();
+      ctx.fill();
 
-/* Draw frame */
-function draw(){
-  // clear
-  ctx.clearRect(0,0,W,H);
-  // background vignette
-  const g = ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'rgba(255,255,255,0.02)');
-  g.addColorStop(1,'rgba(0,0,0,0.06)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
+      // bullets
+      ctx.fillStyle = '#fff0';
+      for (const b of player.bullets) {
+        ctx.fillStyle = '#ffe6f1';
+        roundRect(ctx, b.x, b.y, b.w, b.h, 3, true, false);
+      }
 
-  // draw items
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  for(const it of items){
-    ctx.font = `${Math.floor(it.size)}px serif`;
-    // shadow
-    ctx.shadowColor = 'rgba(0,0,0,0.45)';
-    ctx.shadowBlur = 6;
-    ctx.fillText(it.emoji, it.x + it.size/2, it.y + it.size/2);
-    ctx.shadowBlur = 0;
-  }
+      // HUD (top)
+      ctx.fillStyle = 'rgba(255,255,255,0.02)';
+      ctx.fillRect(6, 6, W - 12, 36);
+    }
 
-  // draw player (a stylized tray)
-  // body
-  ctx.fillStyle = '#ffffff11';
-  roundRect(ctx, player.x - 6, player.y - 6, player.w + 12, player.h + 12, 10, true, false);
-  // player "bar"
-  ctx.fillStyle = '#ffe6f1';
-  roundRect(ctx, player.x, player.y, player.w, player.h, 6, true, false);
-  // little "brush" icon as triangular turret
-  ctx.fillStyle = '#ff5f8e';
-  ctx.beginPath();
-  ctx.moveTo(player.x + player.w/2 - 8, player.y - 4);
-  ctx.lineTo(player.x + player.w/2 + 8, player.y - 4);
-  ctx.lineTo(player.x + player.w/2, player.y - 18);
-  ctx.closePath();
-  ctx.fill();
+    /* Game over */
+    function gameOver() {
+      game.running = false;
+      cancelAnimationFrame(runLoop);
+      // draw final overlay
+      ctx.fillStyle = 'rgba(2,6,23,0.7)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      ctx.font = '32px system-ui, serif';
+      ctx.fillText('Game Over', W / 2, H / 2 - 24);
+      ctx.font = '20px system-ui, serif';
+      ctx.fillText(`Punteggio: ${game.score}`, W / 2, H / 2 + 8);
+      ctx.font = '14px system-ui, serif';
+      ctx.fillText('Premi AVVIA per giocare di nuovo', W / 2, H / 2 + 40);
+    }
 
-  // bullets
-  ctx.fillStyle = '#fff0';
-  for(const b of player.bullets){
-    ctx.fillStyle = '#ffe6f1';
-    roundRect(ctx, b.x, b.y, b.w, b.h, 3, true, false);
-  }
+    /* Utility: rounded rect */
+    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+      if (typeof stroke === 'undefined') { stroke = true; }
+      if (typeof r === 'undefined') { r = 5; }
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
 
-  // HUD (top)
-  ctx.fillStyle = 'rgba(255,255,255,0.02)';
-  ctx.fillRect(6,6,W-12,36);
-}
+    /* initial */
+    positionPlayer();
+    draw();
 
-/* Game over */
-function gameOver(){
-  game.running = false;
-  cancelAnimationFrame(runLoop);
-  // draw final overlay
-  ctx.fillStyle = 'rgba(2,6,23,0.7)';
-  ctx.fillRect(0,0,W,H);
-  ctx.fillStyle = 'white';
-  ctx.textAlign = 'center';
-  ctx.font = '32px system-ui, serif';
-  ctx.fillText('Game Over', W/2, H/2 - 24);
-  ctx.font = '20px system-ui, serif';
-  ctx.fillText(`Punteggio: ${game.score}`, W/2, H/2 + 8);
-  ctx.font = '14px system-ui, serif';
-  ctx.fillText('Premi AVVIA per giocare di nuovo', W/2, H/2 + 40);
-}
+    /* small keyboard pause binding */
+    window.addEventListener('keydown', e => {
+      if (e.key === 'p') togglePause();
+      if (e.key === 'r') startGame();
+    });
 
-/* Utility: rounded rect */
-function roundRect(ctx, x, y, w, h, r, fill, stroke) {
-  if (typeof stroke === 'undefined'){ stroke = true; }
-  if (typeof r === 'undefined'){ r = 5; }
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-  if (fill) ctx.fill();
-  if (stroke) ctx.stroke();
-}
-
-/* initial */
-positionPlayer();
-draw();
-
-/* small keyboard pause binding */
-window.addEventListener('keydown', e=>{
-  if(e.key === 'p') togglePause();
-  if(e.key === 'r') startGame();
-});
-
-/* auto start? no - wait for user */
-</script>
+    /* auto start? no - wait for user */
+  </script>
 </body>
+
 </html>
