@@ -446,8 +446,9 @@
       // draw items
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff'; // Ensure opacity for emojis on iOS
       for (const it of items) {
-        ctx.font = `${Math.floor(it.size)}px serif`;
+        ctx.font = `${Math.floor(it.size)}px system-ui, sans-serif`;
         // shadow
         ctx.shadowColor = 'rgba(0,0,0,0.45)';
         ctx.shadowBlur = 6;
