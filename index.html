@@ -170,6 +170,7 @@
 
 <body>
   <div class="wrap">
+    <img src="./public/alien-05.svg" alt="space">
     <div class="game-area">
       <canvas id="game"></canvas>
     </div>
@@ -246,39 +247,60 @@
     /* Player */
     const player = {
       w: 64,
-      h: 24,
+      h: 64,
       x: 0,
       y: 0,
       speed: 420, // px/s
       color: '#ffdbe6',
       bullets: [],
       shootCooldown: 0,
-      shootDelay: 300
+      shootDelay: 300,
+      img: new Image()
     };
+    player.img.onload = () => draw();
+    player.img.src = 'public/invaders/alien/alien-05.svg';
 
     /* Falling items (trucchi) */
     const items = [];
-    const emojis = [
-      { e: '💄', score: 40 },
-      { e: '💋', score: 30 },
-      { e: '🧴', score: 20 },
-      { e: '🫧', score: 50 },
-      { e: '💣', score: -15 }
+    /* Falling items (trucchi) */
+    const productTypes = [
+      { src: 'public/invaders/products/product-01.svg', score: 40, img: new Image(), cache: null },
+      { src: 'public/invaders/products/product-02.svg', score: 30, img: new Image(), cache: null },
+      { src: 'public/invaders/products/product-03.svg', score: 20, img: new Image(), cache: null },
+      { src: 'public/invaders/products/product-04.svg', score: 50, img: new Image(), cache: null },
+      { e: '💣', score: -15, type: 'bomb' }
     ];
+    // Preload images and cache them
+    productTypes.forEach(p => {
+      if (p.src) {
+        p.img.onload = () => {
+          // Create offscreen canvas for caching
+          const c = document.createElement('canvas');
+          c.width = 64;
+          c.height = 64;
+          const cx = c.getContext('2d');
+          cx.drawImage(p.img, 0, 0, 64, 64);
+          p.cache = c;
+        };
+        p.img.src = p.src;
+      }
+    });
 
     /* Helpers */
     function rand(min, max) { return Math.random() * (max - min) + min; }
     function spawnItem() {
-      const pick = emojis[Math.floor(Math.random() * emojis.length)];
-      const size = rand(28, 44);
+      const pick = productTypes[Math.floor(Math.random() * productTypes.length)];
+      const size = rand(50, 60); // slightly larger for images
       const item = {
         x: rand(20, W - 60),
         y: -50,
         size: size,
-        emoji: pick.e,
         score: pick.score,
         vy: rand(70, 150) + (game.level - 1) * 15,
-        vx: rand(-20, 20)
+        vx: rand(-20, 20),
+        type: pick.type || 'product',
+        cache: pick.cache, // use cached bitmap
+        emoji: pick.e
       };
       items.push(item);
     }
@@ -446,31 +468,30 @@
       // draw items
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#ffffff'; // Ensure opacity for emojis on iOS
       for (const it of items) {
-        ctx.font = `${Math.floor(it.size)}px system-ui, sans-serif`;
-        // shadow
-        ctx.shadowColor = 'rgba(0,0,0,0.45)';
-        ctx.shadowBlur = 6;
-        ctx.fillText(it.emoji, it.x + it.size / 2, it.y + it.size / 2);
-        ctx.shadowBlur = 0;
+        if (it.type === 'bomb') {
+          ctx.fillStyle = '#ffffff';
+          ctx.font = `${Math.floor(it.size)}px system-ui, sans-serif`;
+          ctx.shadowColor = 'rgba(0,0,0,0.45)';
+          ctx.shadowBlur = 6;
+          ctx.fillText(it.emoji, it.x + it.size / 2, it.y + it.size / 2);
+          ctx.shadowBlur = 0;
+        } else {
+          // Draw product image from cache
+          if (it.cache) {
+            ctx.drawImage(it.cache, it.x, it.y, it.size, it.size);
+          } else {
+            // Fallback (should be rare due to preload)
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(it.x, it.y, it.size, it.size);
+          }
+        }
       }
 
-      // draw player (a stylized tray)
-      // body
-      ctx.fillStyle = '#ffffff11';
-      roundRect(ctx, player.x - 6, player.y - 6, player.w + 12, player.h + 12, 10, true, false);
-      // player "bar"
-      ctx.fillStyle = '#ffe6f1';
-      roundRect(ctx, player.x, player.y, player.w, player.h, 6, true, false);
-      // little "brush" icon as triangular turret
-      ctx.fillStyle = '#ff5f8e';
-      ctx.beginPath();
-      ctx.moveTo(player.x + player.w / 2 - 8, player.y - 4);
-      ctx.lineTo(player.x + player.w / 2 + 8, player.y - 4);
-      ctx.lineTo(player.x + player.w / 2, player.y - 18);
-      ctx.closePath();
-      ctx.fill();
+      // draw player (alien svg)
+      if (player.img.complete) {
+        ctx.drawImage(player.img, player.x, player.y, player.w, player.h);
+      }
 
       // bullets
       ctx.fillStyle = '#fff0';
