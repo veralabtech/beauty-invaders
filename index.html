@@ -425,11 +425,20 @@
             if (hit(bb, ib)) {
               // hit!
               player.bullets.splice(j, 1);
-              // reward
-              game.score += it.score;
-              // small chance to add extra life for high score hits
-              if (Math.random() < 0.03) game.lives = Math.min(5, game.lives + 1);
-              items.splice(i, 1);
+
+              // Check if this is the alien (negative score)
+              if (it.score < 0) {
+                // Shooting the alien causes you to lose a life!
+                game.lives -= 1;
+                items.splice(i, 1);
+                if (game.lives <= 0) { gameOver(); return; }
+              } else {
+                // Normal product - add score
+                game.score += it.score;
+                // small chance to add extra life for high score hits
+                if (Math.random() < 0.03) game.lives = Math.min(5, game.lives + 1);
+                items.splice(i, 1);
+              }
               break;
             }
           }
