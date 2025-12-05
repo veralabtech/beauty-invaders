@@ -170,7 +170,6 @@
 
 <body>
   <div class="wrap">
-    <img src="./public/alien-05.svg" alt="space">
     <div class="game-area">
       <canvas id="game"></canvas>
     </div>
@@ -193,7 +192,7 @@
 
       <div style="margin-top:8px;">
         <strong>Obiettivo:</strong>
-        elimina i trucchi (💄💋🧴🫧) prima che arrivino alla base, ma fai attenzione alle bombe (💣 )!
+        elimina i trucchi (💄💋🧴🫧) prima che arrivino alla base, ma fai attenzione alle creme!
       </div>
 
       <div class="touch-controls" style="margin-top:auto">
@@ -246,8 +245,8 @@
 
     /* Player */
     const player = {
-      w: 64,
-      h: 64,
+      w: 86,
+      h: 86,
       x: 0,
       y: 0,
       speed: 420, // px/s
@@ -258,30 +257,20 @@
       img: new Image()
     };
     player.img.onload = () => draw();
-    player.img.src = 'public/invaders/alien/alien-05.svg';
+    player.img.src = 'public/invaders/alien/alien-05.png';
 
     /* Falling items (trucchi) */
     const items = [];
     /* Falling items (trucchi) */
     const productTypes = [
-      { src: 'public/invaders/products/product-01.svg', score: 40, img: new Image(), cache: null },
-      { src: 'public/invaders/products/product-02.svg', score: 30, img: new Image(), cache: null },
-      { src: 'public/invaders/products/product-03.svg', score: 20, img: new Image(), cache: null },
-      { src: 'public/invaders/products/product-04.svg', score: 50, img: new Image(), cache: null },
-      { e: '💣', score: -15, type: 'bomb' }
+      { src: 'public/invaders/products/product-01.png', score: 40, img: new Image() },
+      { src: 'public/invaders/products/product-02.png', score: 30, img: new Image() },
+      { src: 'public/invaders/products/product-03.png', score: 20, img: new Image() },
+      { src: 'public/invaders/products/product-04.png', score: -15, img: new Image() }
     ];
-    // Preload images and cache them
+    // Preload images
     productTypes.forEach(p => {
       if (p.src) {
-        p.img.onload = () => {
-          // Create offscreen canvas for caching
-          const c = document.createElement('canvas');
-          c.width = 64;
-          c.height = 64;
-          const cx = c.getContext('2d');
-          cx.drawImage(p.img, 0, 0, 64, 64);
-          p.cache = c;
-        };
         p.img.src = p.src;
       }
     });
@@ -290,7 +279,7 @@
     function rand(min, max) { return Math.random() * (max - min) + min; }
     function spawnItem() {
       const pick = productTypes[Math.floor(Math.random() * productTypes.length)];
-      const size = rand(50, 60); // slightly larger for images
+      const size = rand(70, 80); // slightly larger for images
       const item = {
         x: rand(20, W - 60),
         y: -50,
@@ -299,8 +288,7 @@
         vy: rand(70, 150) + (game.level - 1) * 15,
         vx: rand(-20, 20),
         type: pick.type || 'product',
-        cache: pick.cache, // use cached bitmap
-        emoji: pick.e
+        img: pick.img
       };
       items.push(item);
     }
@@ -477,11 +465,11 @@
           ctx.fillText(it.emoji, it.x + it.size / 2, it.y + it.size / 2);
           ctx.shadowBlur = 0;
         } else {
-          // Draw product image from cache
-          if (it.cache) {
-            ctx.drawImage(it.cache, it.x, it.y, it.size, it.size);
+          // Draw product image directly
+          if (it.img && it.img.complete) {
+            ctx.drawImage(it.img, it.x, it.y, it.size, it.size);
           } else {
-            // Fallback (should be rare due to preload)
+            // Fallback
             ctx.fillStyle = '#fff';
             ctx.fillRect(it.x, it.y, it.size, it.size);
           }
