@@ -181,8 +181,8 @@
         <div class="stat">Livello: <span id="level">1</span></div>
       </div>
       <div class="hint">
-        Muoviti con le frecce ◀ ▶ o tocca <b>Sinistra/Destra</b>. Premi <b>Space</b> per sparare.
-        Su mobile usa i tasti touch qui sotto.
+        Comandi: Muoviti con le <b>frecce</b> della tastiera, da mobile usa i tasti touch ◀ ▶ qui sotto. Premi
+        <b>Space</b> per sparare.
       </div>
 
       <div class="controls">
@@ -192,7 +192,8 @@
 
       <div style="margin-top:8px;">
         <strong>Obiettivo:</strong>
-        elimina i trucchi (💄💋🧴🫧) prima che arrivino alla base, ma fai attenzione alle creme!
+        elimina i prodotti prima che arrivino alla base, ma fai attenzione alle creme in vasetto in quanto tolgono
+        punti!
       </div>
 
       <div class="touch-controls" style="margin-top:auto">
@@ -305,8 +306,12 @@
     /* Touch controls */
     document.getElementById('leftTouch').addEventListener('touchstart', e => { e.preventDefault(); keys['ArrowLeft'] = true; });
     document.getElementById('leftTouch').addEventListener('touchend', e => { e.preventDefault(); keys['ArrowLeft'] = false; });
+    document.getElementById('leftTouch').addEventListener('mousedown', e => { e.preventDefault(); keys['ArrowLeft'] = true; });
+    document.getElementById('leftTouch').addEventListener('mouseup', e => { e.preventDefault(); keys['ArrowLeft'] = false; });
     document.getElementById('rightTouch').addEventListener('touchstart', e => { e.preventDefault(); keys['ArrowRight'] = true; });
     document.getElementById('rightTouch').addEventListener('touchend', e => { e.preventDefault(); keys['ArrowRight'] = false; });
+    document.getElementById('rightTouch').addEventListener('mousedown', e => { e.preventDefault(); keys['ArrowRight'] = true; });
+    document.getElementById('rightTouch').addEventListener('mouseup', e => { e.preventDefault(); keys['ArrowRight'] = false; });
     document.getElementById('shootTouch').addEventListener('click', e => { keys[' '] = true; setTimeout(() => keys[' '] = false, 80); });
 
     /* UI */
