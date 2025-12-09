@@ -412,7 +412,26 @@
     /* Helpers */
     function rand(min, max) { return Math.random() * (max - min) + min; }
     function spawnItem() {
-      const pick = productTypes[Math.floor(Math.random() * productTypes.length)];
+      // Count current aliens on screen
+      const currentAliens = items.filter(item => item.score < 0).length;
+
+      let pick;
+      // Check if we can spawn an alien (less than 2 on screen)
+      if (currentAliens < 2) {
+        const shouldSpawnAlien = Math.random() < 0.30;
+        if (shouldSpawnAlien) {
+          pick = productTypes[3]; // alien-07 is at index 3
+        } else {
+          // Spawn a random product instead
+          const productOnlyTypes = productTypes.slice(0, 3); // products only
+          pick = productOnlyTypes[Math.floor(Math.random() * productOnlyTypes.length)];
+        }
+      } else {
+        // Already at max aliens (2), only spawn products
+        const productOnlyTypes = productTypes.slice(0, 3); // products only
+        pick = productOnlyTypes[Math.floor(Math.random() * productOnlyTypes.length)];
+      }
+
       const size = rand(70, 80); // slightly larger for images
       const item = {
         x: rand(20, W - 60),
@@ -585,11 +604,15 @@
         // bounce a bit horizontally
         if (it.x < 6 || it.x + it.size > W - 6) it.vx *= -1;
 
-        // check if reached bottom -> lose life
-        if (it.y > H - 20 && it.score > 0) {
+        // check if reached bottom
+        if (it.y > H - 20) {
+          // Products (score > 0) cause you to lose a life
+          if (it.score > 0) {
+            game.lives -= 1;
+            if (game.lives <= 0) { gameOver(); return; }
+          }
+          // Remove the item (whether product or alien)
           items.splice(i, 1);
-          game.lives -= 1;
-          if (game.lives <= 0) { gameOver(); return; }
         } else {
           // check collision with bullets
           for (let j = player.bullets.length - 1; j >= 0; j--) {
