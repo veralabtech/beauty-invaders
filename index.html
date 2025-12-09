@@ -319,6 +319,18 @@
         margin-top: 0 !important;
         margin-bottom: 10px;
       }
+
+      .touch-controls button {
+        padding: 16px 8px;
+        font-size: 18px;
+      }
+    }
+
+    /* Hide touch controls on desktop */
+    @media(min-width:881px) {
+      .touch-controls {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -353,14 +365,11 @@
         </div>
       </div>
     </div>
-    <aside class="panel" style="margin-bottom: 16px;">
-      <div class="touch-controls" style="margin-top:auto;">
-        <button id="leftTouch">◀</button>
-        <button id="shootTouch">FIRE</button>
-        <button id="rightTouch">▶</button>
-      </div>
-
-    </aside>
+    <div class="touch-controls" style="margin-top:auto;">
+      <button id="leftTouch">◀</button>
+      <button id="shootTouch">FIRE</button>
+      <button id="rightTouch">▶</button>
+    </div>
   </div>
 
   <script>
