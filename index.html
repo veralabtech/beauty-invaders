@@ -64,7 +64,7 @@
     .game-area {
       flex: 1;
       min-width: 0;
-      min-height: 0;
+      min-height: 400px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -96,8 +96,11 @@
     @media(max-width:880px) {
       .panel {
         width: auto;
-        max-height: 40%;
-        /* Limit panel height on mobile */
+        max-height: 5%;
+        min-height: 150px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* Limit panel height on mobile and ensure scrollability */
       }
     }
 
@@ -180,20 +183,20 @@
         <div class="stat">Vite: <span id="lives">3</span></div>
         <div class="stat">Livello: <span id="level">1</span></div>
       </div>
-      <div class="hint">
-        Comandi: Muoviti con le <b>frecce</b> della tastiera, da mobile usa i tasti touch ◀ ▶ qui sotto. Premi
-        <b>Space</b> per sparare.
+      <div>
+        <strong>Obiettivo:</strong>
+        elimina i prodotti prima che arrivino alla base, ma <strong>fai attenzione all'alieno</strong>, potrebbe essere
+        pericoloso!
       </div>
 
       <div class="controls">
         <button id="startBtn">Avvia / Riavvia</button>
         <button id="pauseBtn" class="secondary">Pausa</button>
       </div>
-
-      <div style="margin-top:8px;">
-        <strong>Obiettivo:</strong>
-        elimina i prodotti prima che arrivino alla base, ma <strong>fai attenzione all'alieno</strong>, potrebbe essere
-        pericoloso!
+      <div class="hint" style="margin-top:8px;">
+        Comandi: da mobile usa i <b>tasti touch</b> ◀ ▶ per muoverti e <b>Fire</b> per sparare. Da desktop muoviti con
+        le
+        <b>frecce</b> della tastiera e premi <b>Space</b> per sparare.
       </div>
 
       <div class="touch-controls" style="margin-top:auto">
@@ -219,8 +222,8 @@
     function resize() {
       // handle HiDPI
       const rect = canvas.getBoundingClientRect();
-      W = Math.max(320, rect.width);
-      H = Math.max(300, rect.height);
+      W = Math.max(420, rect.width);
+      H = Math.max(500, rect.height);
       scale = window.devicePixelRatio || 1;
       canvas.width = Math.floor(W * scale);
       canvas.height = Math.floor(H * scale);
