@@ -10,7 +10,8 @@
       --bg: #0f1724;
       --panel: #0b1220aa;
       --accent: #ff7aa2;
-      --text: #f8fafc;
+      --text: #a2a2a2;
+      --pause: #a7a7a7;
     }
 
     html,
@@ -64,10 +65,18 @@
     .game-area {
       flex: 1;
       min-width: 0;
-      min-height: 0;
+      min-height: 400px;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+    }
+
+    @media(max-width:880px) {
+      .game-area {
+        min-height: 85vh;
+        /* Increase height on mobile for better gameplay */
+      }
     }
 
     canvas {
@@ -77,6 +86,54 @@
       display: block;
       border-radius: 8px;
       object-fit: contain;
+    }
+
+    /* Welcome Screen */
+    .welcome-screen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      text-align: center;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      pointer-events: auto;
+    }
+
+    .welcome-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .welcome-screen.game-over-mode {
+      top: 65%;
+      /* Position lower on game over to be below the text */
+    }
+
+    .game-title {
+      font-size: 48px;
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 32px;
+      text-shadow: 0 4px 12px rgba(255, 122, 162, 0.5);
+    }
+
+    .game-title.hidden {
+      display: none;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .button-container button {
+      font-size: 18px;
+      padding: 16px 32px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     .panel {
@@ -90,34 +147,106 @@
       gap: 10px;
       align-items: stretch;
       overflow-y: auto;
-      /* Allow panel scroll if really needed */
     }
 
     @media(max-width:880px) {
       .panel {
         width: auto;
-        max-height: 40%;
-        /* Limit panel height on mobile */
+        max-height: 5%;
+        min-height: 150px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
     }
 
     .panel h2 {
       margin: 0;
       font-size: 18px;
-      color: var(--accent)
+      color: var(--accent);
+      flex: 1;
+    }
+
+    #pauseBtn {
+      font-size: 14px;
+      padding: 8px 14px;
+      flex-shrink: 0;
+      background-color: var(--pause);
+    }
+
+    #pauseBtn.hidden {
+      display: none;
+    }
+
+    /* Tooltip styling */
+    .tooltip {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(11, 18, 32, 0.95);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      padding: 20px 24px;
+      min-width: 300px;
+      z-index: 100;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .tooltip.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .tooltip-content {
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .tooltip-close {
+      margin-top: 16px;
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .tooltip-close:hover {
+      opacity: 0.9;
     }
 
     .stats {
+      position: absolute;
+      top: 2px;
+      right: 50%;
+      transform: translateX(50%);
       display: flex;
       gap: 8px;
-      flex-wrap: wrap
+      flex-wrap: nowrap;
     }
 
     .stat {
       background: rgba(255, 255, 255, 0.03);
       padding: 8px;
       border-radius: 8px;
-      font-size: 14px
+      font-size: 14px;
+      white-space: nowrap;
     }
 
     .controls {
@@ -137,7 +266,7 @@
 
     button.secondary {
       background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      border: 1px solid #ff7aa2;
     }
 
     .hint {
@@ -154,7 +283,7 @@
 
     .touch-controls button {
       flex: 1;
-      padding: 12px;
+      padding: 8px;
     }
 
     /* Larger touch targets */
@@ -171,31 +300,35 @@
 <body>
   <div class="wrap">
     <div class="game-area">
-      <canvas id="game"></canvas>
-    </div>
-    <aside class="panel">
-      <h2>Beauty Invaders</h2>
       <div class="stats">
         <div class="stat">Punteggio: <span id="score">0</span></div>
         <div class="stat">Vite: <span id="lives">3</span></div>
         <div class="stat">Livello: <span id="level">1</span></div>
+        <button id="pauseBtn" class="secondary hidden">Pausa</button>
       </div>
-      <div class="hint">
-        Comandi: Muoviti con le <b>frecce</b> della tastiera, da mobile usa i tasti touch ◀ ▶ qui sotto. Premi
-        <b>Space</b> per sparare.
+      <div id="helpTooltip" class="tooltip">
+        <div class="tooltip-content">
+          <p style="text-align: center; font-weight: bold;">Comandi</p>
+          <p>Mobile: usa i <b>tasti touch</b> ◀ ▶ per muoverti e <b>Fire</b> per sparare.</p>
+          <p>Desktop: muoviti con le <b>frecce</b> della tastiera e premi <b>Space</b> per sparare.</p>
+          <p> <strong>Obiettivo:</strong>
+            elimina i prodotti prima che arrivino alla base, ma <strong>fai attenzione all'alieno</strong>, potrebbe
+            essere
+            pericoloso!
+          </p>
+          <button id="closeTooltipBtn" class="tooltip-close">Chiudi</button>
+        </div>
       </div>
-
-      <div class="controls">
-        <button id="startBtn">Avvia / Riavvia</button>
-        <button id="pauseBtn" class="secondary">Pausa</button>
+      <canvas id="game"></canvas>
+      <div id="welcomeScreen" class="welcome-screen">
+        <h1 id="gameTitle" class="game-title">Beauty Invaders</h1>
+        <div class="button-container">
+          <button id="startBtn">Avvia</button>
+          <button id="helpBtn" class="secondary">Aiuto</button>
+        </div>
       </div>
-
-      <div style="margin-top:8px;">
-        <strong>Obiettivo:</strong>
-        elimina i prodotti prima che arrivino alla base, ma <strong>fai attenzione all'alieno</strong>, potrebbe essere
-        pericoloso!
-      </div>
-
+    </div>
+    <aside class="panel">
       <div class="touch-controls" style="margin-top:auto">
         <button id="leftTouch">◀</button>
         <button id="shootTouch">FIRE</button>
@@ -219,8 +352,8 @@
     function resize() {
       // handle HiDPI
       const rect = canvas.getBoundingClientRect();
-      W = Math.max(320, rect.width);
-      H = Math.max(300, rect.height);
+      W = Math.max(420, rect.width);
+      H = Math.max(500, rect.height);
       scale = window.devicePixelRatio || 1;
       canvas.width = Math.floor(W * scale);
       canvas.height = Math.floor(H * scale);
@@ -279,7 +412,27 @@
     /* Helpers */
     function rand(min, max) { return Math.random() * (max - min) + min; }
     function spawnItem() {
-      const pick = productTypes[Math.floor(Math.random() * productTypes.length)];
+      // Count current aliens on screen
+      const currentAliens = items.filter(item => item.score < 0).length;
+
+      let pick;
+      // Check if we can spawn an alien (less than 2 on screen)
+      if (currentAliens < 2) {
+        // Dynamic spawn rate: 20% base + 10% per level, capped at 70%
+        const alienSpawnRate = Math.min(0.70, 0.20 + (game.level - 1) * 0.10);
+        const shouldSpawnAlien = Math.random() < alienSpawnRate;
+        if (shouldSpawnAlien) {
+          pick = productTypes[3]; // alien-07 is at index 3
+        } else {
+          // Spawn a random product instead
+          const productOnlyTypes = productTypes.slice(0, 3); // products only
+          pick = productOnlyTypes[Math.floor(Math.random() * productOnlyTypes.length)];
+        }
+      } else {
+        const productOnlyTypes = productTypes.slice(0, 3); // products only
+        pick = productOnlyTypes[Math.floor(Math.random() * productOnlyTypes.length)];
+      }
+
       const size = rand(70, 80); // slightly larger for images
       const item = {
         x: rand(20, W - 60),
@@ -318,8 +471,37 @@
     const scoreEl = document.getElementById('score');
     const livesEl = document.getElementById('lives');
     const levelEl = document.getElementById('level');
-    document.getElementById('startBtn').addEventListener('click', startGame);
-    document.getElementById('pauseBtn').addEventListener('click', togglePause);
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const helpBtn = document.getElementById('helpBtn');
+    const helpTooltip = document.getElementById('helpTooltip');
+    const welcomeScreen = document.getElementById('welcomeScreen');
+    const gameTitle = document.getElementById('gameTitle');
+
+    let tooltipTimeout = null;
+
+    startBtn.addEventListener('click', startGame);
+    pauseBtn.addEventListener('click', togglePause);
+
+    // Help button functionality
+    helpBtn.addEventListener('click', () => {
+      helpTooltip.classList.add('visible');
+
+      // Clear any existing timeout
+      if (tooltipTimeout) clearTimeout(tooltipTimeout);
+
+      // Auto-close after 8 seconds
+      tooltipTimeout = setTimeout(() => {
+        helpTooltip.classList.remove('visible');
+      }, 12000);
+    });
+
+    // Close button functionality
+    const closeTooltipBtn = document.getElementById('closeTooltipBtn');
+    closeTooltipBtn.addEventListener('click', () => {
+      helpTooltip.classList.remove('visible');
+      if (tooltipTimeout) clearTimeout(tooltipTimeout);
+    });
 
     function startGame() {
       // reset
@@ -328,6 +510,18 @@
       items.length = 0; player.bullets.length = 0;
       player.shootCooldown = 0;
       game.running = true; game.paused = false;
+
+      // Hide welcome screen and show pause button
+      welcomeScreen.classList.add('hidden');
+      welcomeScreen.classList.remove('game-over-mode'); // Remove game over positioning
+      pauseBtn.classList.remove('hidden');
+      helpTooltip.classList.remove('visible');
+      if (tooltipTimeout) clearTimeout(tooltipTimeout);
+
+      // Reset button text and title visibility for next time
+      startBtn.textContent = 'Avvia';
+      gameTitle.classList.remove('hidden');
+
       lastTime = performance.now();
       positionPlayer();
       loop(lastTime);
@@ -411,11 +605,15 @@
         // bounce a bit horizontally
         if (it.x < 6 || it.x + it.size > W - 6) it.vx *= -1;
 
-        // check if reached bottom -> lose life
-        if (it.y > H - 20 && it.score > 0) {
+        // check if reached bottom
+        if (it.y > H - 20) {
+          // Products (score > 0) cause you to lose a life
+          if (it.score > 0) {
+            game.lives -= 1;
+            if (game.lives <= 0) { gameOver(); return; }
+          }
+          // Remove the item (whether product or alien)
           items.splice(i, 1);
-          game.lives -= 1;
-          if (game.lives <= 0) { gameOver(); return; }
         } else {
           // check collision with bullets
           for (let j = player.bullets.length - 1; j >= 0; j--) {
@@ -511,6 +709,14 @@
     function gameOver() {
       game.running = false;
       cancelAnimationFrame(runLoop);
+
+      // Show welcome screen without title, change button text
+      welcomeScreen.classList.remove('hidden');
+      welcomeScreen.classList.add('game-over-mode'); // Position lower on game over
+      gameTitle.classList.add('hidden'); // Hide title on game over
+      startBtn.textContent = 'Riavvia';
+      pauseBtn.classList.add('hidden');
+
       // draw final overlay
       ctx.fillStyle = 'rgba(2,6,23,0.7)';
       ctx.fillRect(0, 0, W, H);
@@ -521,7 +727,7 @@
       ctx.font = '20px system-ui, serif';
       ctx.fillText(`Punteggio: ${game.score}`, W / 2, H / 2 + 8);
       ctx.font = '14px system-ui, serif';
-      ctx.fillText('Premi AVVIA per giocare di nuovo', W / 2, H / 2 + 40);
+      ctx.fillText('Premi RIAVVIA per giocare di nuovo', W / 2, H / 2 + 40);
     }
 
     /* Utility: rounded rect */
