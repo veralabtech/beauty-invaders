@@ -418,7 +418,9 @@
       let pick;
       // Check if we can spawn an alien (less than 2 on screen)
       if (currentAliens < 2) {
-        const shouldSpawnAlien = Math.random() < 0.30;
+        // Dynamic spawn rate: 20% base + 10% per level, capped at 70%
+        const alienSpawnRate = Math.min(0.70, 0.20 + (game.level - 1) * 0.10);
+        const shouldSpawnAlien = Math.random() < alienSpawnRate;
         if (shouldSpawnAlien) {
           pick = productTypes[3]; // alien-07 is at index 3
         } else {
@@ -427,7 +429,6 @@
           pick = productOnlyTypes[Math.floor(Math.random() * productOnlyTypes.length)];
         }
       } else {
-        // Already at max aliens (2), only spawn products
         const productOnlyTypes = productTypes.slice(0, 3); // products only
         pick = productOnlyTypes[Math.floor(Math.random() * productOnlyTypes.length)];
       }
