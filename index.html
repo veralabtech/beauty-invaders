@@ -265,7 +265,12 @@
       color: white;
       padding: 8px 10px;
       border-radius: 8px;
-      cursor: pointer
+      cursor: pointer;
+      /* Prevent text selection and Safari touch behaviors on all buttons */
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     button.secondary {
@@ -285,12 +290,17 @@
       margin-top: 6px;
       /* Add extra padding to account for mobile browser bars - increased for iOS Safari */
       /* padding-bottom: max(8px, env(safe-area-inset-bottom)); BEFORE */
-      padding-bottom: calc(100vh - 10px);
+      padding-bottom: calc(100vh - 20px);
     }
 
     .touch-controls button {
       flex: 1;
       padding: 8px;
+      /* Prevent text selection and Safari touch behaviors */
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* Larger touch targets */
