@@ -284,13 +284,19 @@
     }
 
     .touch-controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
       display: flex;
       gap: 8px;
       justify-content: center;
-      margin-top: 6px;
-      /* Add extra padding to account for mobile browser bars - increased for iOS Safari */
-      /* padding-bottom: max(8px, env(safe-area-inset-bottom)); BEFORE */
-      padding-bottom: calc(100vh - 50px);
+      padding: 12px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: rgba(0, 0, 0, 0.8);
+      /* Key: account for safe area in the calculation */
+      height: max-content;
+      z-index: 100;
     }
 
     .touch-controls button {
